@@ -7,28 +7,32 @@ ${BROWSER}        chrome
 *** Test Cases ***
 Add Operation Works Well
     [Template]    Add Operation Workflow
-    1    1    2
-    100    200    300
-    XYZ    150    N/A
+     1         登録しました 
+     1.1       登録しました 
+     999       登録しました 
+     ${EMPTY}  小数点以下1桁以内で入力してください
+     ABC       小数点以下1桁以内で入力してください
+     1.12      小数点以下1桁以内で入力してください
+     1000      0～999.9の値を入力してください
+     -1        0～999.9の値を入力してください
 
 *** Keywords ***
 Add Operation Workflow
-    [Arguments]    ${arg1}    ${arg2}    ${expected}
+    [Arguments]    ${arg1}    ${expected}
     Open Application Page
-    ${calc_value}=    Calculate In Application Page    ${arg1}    ${arg2}
-    Should Be Equal    ${calc_value}    ${expected}
+    ${message}=    Calculate In Application Page    ${arg1}
+    Should Be Equal    ${message}    ${expected}
     Close Application Page
 
 Open Application Page
     Open Browser    http://localhost:9080/weight_recorder    ${BROWSER}
 
 Calculate In Application Page
-    [Arguments]    ${arg1}    ${arg2}
-    Input Text    arg1    ${arg1}
-    Input Text    arg2    ${arg2}
+    [Arguments]    ${arg1}
+    Input Text    weight    ${arg1}
     Submit Form
-    ${result}=    Get Value    result
-    [Return]    ${result}
+    ${message}=	Get Text	message
+    [Return]    ${message}
 
 Close Application Page
     Close Browser

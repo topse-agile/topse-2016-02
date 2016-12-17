@@ -14,6 +14,6 @@
             <input type="submit" value="登録"/>
         </form>
 
-		<div> <%= request.getAttribute("message") %> </div>
+		<div　type="text" name="message"><%= request.getAttribute("message") %></div>
 </body>
 </html>
