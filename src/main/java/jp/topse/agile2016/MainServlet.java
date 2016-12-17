@@ -6,6 +6,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,50 +20,62 @@ public class MainServlet extends HttpServlet {
 
     private static final long serialVersionUID = 6961400581681209885L;
 
+    //フォーマットパターンを指定して表示する
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+    
+    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setAttribute("arg1", null);
-        request.setAttribute("arg2", null);
-        request.setAttribute("result", null);
-        request.setAttribute("history", loadHistory());
+    
+        Calendar c = Calendar.getInstance();
+        
+    	request.setAttribute("date", sdf.format(c.getTime()));
+        request.setAttribute("weight", null);
 
         request.getRequestDispatcher("index.jsp").forward(request, response);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String arg1 = request.getParameter("arg1");
-        request.setAttribute("arg1", arg1);
-        String arg2 = request.getParameter("arg2");
-        request.setAttribute("arg2", arg2);
+        String date = request.getParameter("date");
+        request.setAttribute("date", date);
+        String weight = request.getParameter("weight");
+        request.setAttribute("weight", weight);
 
         try {
-            Integer v1 = Integer.parseInt(arg1);
-            Integer v2 = Integer.parseInt(arg2);
-            int value = v1.intValue() + v2.intValue();
+            Float v = Float.parseFloat(weight);
+            String stringDate = date.replaceAll("/", "") ;
+            Integer sysToday = Integer.parseInt(stringDate);
+            // 100.1はindexOfで3が返る lengthは5が返る
+            // 100.12はindexOfで3 lengthは6
+            if(weight.indexOf(".") != -1 && (weight.indexOf(".") < weight.length() - 2)){
+            	throw new NumberFormatException();
+            }
             
-            record(v1, v2, value);
+            request.setAttribute("result", "");
+            delete(sysToday);
+            record(sysToday, v);
             
-            request.setAttribute("result", String.valueOf(value));
+//            request.setAttribute("result", String.valueOf(value));
         } catch (NumberFormatException e) {
-            request.setAttribute("result", "N/A");
+            request.setAttribute("result", "小数点1桁で入力してください。");
         }
-        
-        request.setAttribute("history", loadHistory());
+  
+  //        request.setAttribute("history", null);
 
         request.getRequestDispatcher("index.jsp").forward(request, response);
     }
     
-    private void record(int v1, int v2, int result) {
+    private void record(Integer sysToday, float v) {
 		Connection connection = null;
         Statement statement = null;
         try {
-            String dbPath = getServletContext().getRealPath("/WEB-INF/logs.db");
+            String dbPath = getServletContext().getRealPath("/WEB-INF/weight.db");
 
             Class.forName("org.sqlite.JDBC");
             connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
             statement = connection.createStatement();
-            String sql = "INSERT INTO logs (v1, v2, result) VALUES (" + v1 +", " + v2 + ", " + result + ")";
+            String sql = "INSERT INTO weight (date, weight) VALUES (" + sysToday +", " + v + ")";
             statement.execute(sql);
         } catch (ClassNotFoundException e) {
           e.printStackTrace();
@@ -84,7 +98,41 @@ public class MainServlet extends HttpServlet {
             }
         }
     }
-    
+
+    private void delete(Integer sysToday) {
+		Connection connection = null;
+        Statement statement = null;
+        try {
+            String dbPath = getServletContext().getRealPath("/WEB-INF/weight.db");
+
+            Class.forName("org.sqlite.JDBC");
+            connection = DriverManager.getConnection("jdbc:sqlite:" + dbPath);
+            statement = connection.createStatement();
+            String sql = "DELETE FROM weight WHERE date =" + sysToday;
+            statement.execute(sql);
+        } catch (ClassNotFoundException e) {
+          e.printStackTrace();
+        } catch (SQLException e) {
+          e.printStackTrace();
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+  /*  
     private List<String> loadHistory() {
         List<String> history = new LinkedList<String>();
 
@@ -128,5 +176,6 @@ public class MainServlet extends HttpServlet {
         
         return history;
     }
+    */
 
 }
