@@ -4,4 +4,6 @@ target/*
 output.xml
 log.html
 report.html
+.settings/
+test.db.sqbpro
 
