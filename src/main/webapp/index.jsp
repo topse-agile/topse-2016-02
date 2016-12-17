@@ -8,26 +8,12 @@
 <title>Main</title>
 </head>
 <body>
-
         <form action="./" method="POST">
-            <input type="text" name="arg1" value="<%= request.getAttribute("arg1") %>" />
-            <span>+</span>
-            <input type="text" name="arg2" value="<%= request.getAttribute("arg2") %>" />
-            <input type="submit" value="="/>
-            <input type="text" name="result" value="<%= request.getAttribute("result") %>" />
+        　　　　　　　 <input type="text" disabled="true" name="date" value="<%= request.getAttribute("date") %>" />　
+            <input type="text" name="weight" value="<%= request.getAttribute("weight") %>" /> kg
+            <input type="submit" value="登録"/>
         </form>
 
-        <ul>
-<%
-List<String> history = (List<String>)request.getAttribute("history");
-if (history != null) {
-for (String item : history) {
-%>
-        <li><%= item %></li>
-<%
-}
-}
- %>
-        </ul>
+		<div> <%= request.getAttribute("message") %> </div>
 </body>
 </html>
